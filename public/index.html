@@ -26,7 +26,7 @@
     window.fbSendLoginLink = null;
     window.fbIsSignInLink = () => false;
     window.fbHandleLogin = null;
-    
+
     // Auth state listener
     window.supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
@@ -97,6 +97,20 @@
 
   <!-- Main Content (SPA) -->
   <main id="app"></main>
+
+  <!-- Newsletter Section -->
+  <section class="newsletter reveal">
+    <div class="newsletter-content">
+      <div class="newsletter-label">Stay Connected</div>
+      <h2>Join the Tech Ecosystem</h2>
+      <p>Subscribe to receive exclusive early access to product launches and elite tech insights.</p>
+      <form class="newsletter-form"
+        onsubmit="event.preventDefault(); showToast('✨ Welcome to the TechWorld ecosystem.'); this.reset();">
+        <input type="email" placeholder="Enter your secure email..." required>
+        <button type="submit">Subscribe →</button>
+      </form>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer>

@@ -1083,6 +1083,9 @@ function renderLogin() {
                   <input type="password" name="password" id="login-password" placeholder="••••••••" required minlength="6">
                 </div>
               </div>
+              <button type="submit" class="btn-primary auth-submit" id="submit-auth">
+                ${currentAuthMode === 'signup' ? 'Create Account →' : 'Sign In →'}
+              </button>
             </form>
             `}
       </div>
