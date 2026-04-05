@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // This endpoint uses the ANON key so RLS applies (only active products)
 const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 );
 
 // GET /api/products - public endpoint for storefront
