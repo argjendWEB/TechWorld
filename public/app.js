@@ -925,7 +925,7 @@ window.loadLiveReviews = async (productId) => {
   if (!container) return;
 
   try {
-    const liveReviews = await window.fbGetReviews(productId);
+    const liveReviews = typeof window.fbGetReviews === 'function' ? await window.fbGetReviews(productId) : [];
     // Merge with static demo reviews for high-fidelity look
     const product = PRODUCTS.find(p => p.id === productId);
     const allReviews = [...liveReviews, ...(product.reviews || [])];
