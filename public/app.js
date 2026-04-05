@@ -3,15 +3,25 @@ let PRODUCTS = [];
 
 // Load products from Supabase API — falls back to hardcoded if API unavailable
 async function loadProducts() {
+  const app = document.getElementById('app');
+  const grid = document.querySelector('.products-grid');
+  if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">Syncing with TechWorld database...</div>';
+
+  console.log('🚀 Initiating Supabase product sync...');
   try {
     const res = await fetch('/api/products');
-    if (!res.ok) throw new Error('API unavailable');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `HTTP ${res.status}`);
+    }
     const data = await res.json();
+    if (!Array.isArray(data)) throw new Error('Invalid data format received');
+
     // Map Supabase fields to storefront field names
     PRODUCTS = data.map(p => ({
       id: p.id,
       name: p.title,
-      price: parseFloat(p.price),
+      price: parseFloat(p.price) || 0,
       category: p.category,
       badge: p.badge || '',
       image: p.image_url || '',
@@ -21,11 +31,12 @@ async function loadProducts() {
       features: p.features || [],
       reviews: []
     }));
-    console.log(`✅ Loaded ${PRODUCTS.length} products from Supabase`);
+    console.log(`✅ Success: Sync complete. ${PRODUCTS.length} products loaded.`);
   } catch (err) {
-    console.warn('⚠️ Could not load from API, using fallback data:', err.message);
-    // Minimal fallback so the site doesn't break
+    console.error('❌ TechWorld Sync Error:', err.message);
+    // Use fallback empty array if sync fails
     PRODUCTS = [];
+    if (grid) grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;">Database connection failed: ${err.message}. Please check your environment variables.</div>`;
   }
   // Re-render once products are loaded
   renderCurrentPage();
