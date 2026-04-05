@@ -2,20 +2,24 @@
 let PRODUCTS = [];
 
 // Load products from Supabase API — falls back to hardcoded if API unavailable
+// Load products from Supabase API — falls back to hardcoded if API unavailable
 async function loadProducts() {
-  const app = document.getElementById('app');
   const grid = document.querySelector('.products-grid');
   if (grid) grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: var(--text-muted);">Syncing with TechWorld database...</div>';
 
-  console.log('🚀 Initiating Supabase product sync...');
+  console.log('🚀 Initiating Direct Supabase sync...');
   try {
-    const res = await fetch('/api/products');
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `HTTP ${res.status}`);
-    }
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error('Invalid data format received');
+    if (!window.supabase) throw new Error('Supabase client not initialized');
+
+    // Fetch directly from products table using the anon client
+    const { data, error } = await window.supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    if (!data) throw new Error('No product data returned');
 
     // Map Supabase fields to storefront field names
     PRODUCTS = data.map(p => ({
@@ -31,12 +35,12 @@ async function loadProducts() {
       features: p.features || [],
       reviews: []
     }));
-    console.log(`✅ Success: Sync complete. ${PRODUCTS.length} products loaded.`);
+
+    console.log(`✅ Success: Direct Sync complete. ${PRODUCTS.length} products loaded.`);
   } catch (err) {
     console.error('❌ TechWorld Sync Error:', err.message);
-    // Use fallback empty array if sync fails
     PRODUCTS = [];
-    if (grid) grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;">Database connection failed: ${err.message}. Please check your environment variables.</div>`;
+    if (grid) grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 3rem; color: #ef4444;">Direct Sync failed: ${err.message}</div>`;
   }
   // Re-render once products are loaded
   renderCurrentPage();
